@@ -1,0 +1,22 @@
+{
+  "players": [
+    { "rank": 1, "name": "المركز 1", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 2, "name": "المركز 2", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 3, "name": "المركز 3", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 4, "name": "المركز 4", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 5, "name": "المركز 5", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 6, "name": "المركز 6", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 7, "name": "المركز 7", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 8, "name": "المركز 8", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 9, "name": "المركز 9", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 10, "name": "المركز 10", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 11, "name": "المركز 11", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 12, "name": "المركز 12", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 13, "name": "المركز 13", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 14, "name": "المركز 14", "status": "متاح", "wins": 0, "losses": 0 },
+    { "rank": 15, "name": "المركز 15", "status": "متاح", "wins": 0, "losses": 0 }
+  ],
+  "apps": [],
+  "msgs": [],
+  "results": []
+}
