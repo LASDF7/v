@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERK - لوحة الإدارة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(192,192,192,0.1) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 50%, rgba(128,128,128,0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: rgba(255,255,255,0.05);
+            border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .header h1 { font-size: 24px; color: #c0c0c0; }
+        .login-box {
+            max-width: 400px; margin: 100px auto;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px; padding: 30px;
+        }
+        .login-box h2 { text-align: center; margin-bottom: 20px; color: #c0c0c0; }
+        .login-box input {
+            width: 100%; padding: 15px; background: rgba(0,0,0,0.3);
+            border: 2px solid rgba(192,192,192,0.3); border-radius: 10px;
+            color: #fff; font-size: 16px; font-family: 'Tajawal', sans-serif; margin-bottom: 15px;
+        }
+        .login-box input:focus { outline: none; border-color: #c0c0c0; }
+        .login-box button {
+            width: 100%; padding: 15px; background: linear-gradient(135deg, #c0c0c0, #808080);
+            border: none; border-radius: 10px; color: #1a1a2e;
+            font-size: 18px; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer;
+        }
+        .main { display: none; }
+        .main.active { display: block; }
+        .tabs {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 24px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+            color: #fff; font-family: 'Tajawal', sans-serif; font-size: 14px;
+            font-weight: 700; cursor: pointer; transition: all 0.3s;
+        }
+        .tab:hover, .tab.active { background: rgba(255,255,255,0.1); border-color: rgba(192,192,192,0.5); }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .card {
+            background: rgba(0,0,0,0.2); border-radius: 12px; padding: 20px;
+            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .card h3 { margin-bottom: 15px; color: #c0c0c0; font-size: 18px; }
+        .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .input-row input {
+            flex: 1; padding: 10px; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            color: #fff; font-family: 'Tajawal', sans-serif;
+        }
+        .btn {
+            padding: 10px 20px; background: linear-gradient(135deg, #c0c0c0, #808080);
+            border: none; border-radius: 8px; color: #1a1a2e;
+            font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif;
+        }
+        .btn-red {
+            padding: 8px 16px; background: rgba(244,67,54,0.2);
+            border: none; border-radius: 6px; color: #f44336;
+            cursor: pointer; font-family: 'Tajawal', sans-serif;
+        }
+        .btn-green {
+            padding: 8px 16px; background: rgba(76,175,80,0.2);
+            border: none; border-radius: 6px; color: #4CAF50;
+            cursor: pointer; font-family: 'Tajawal', sans-serif;
+        }
+        .list-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px; background: rgba(255,255,255,0.03);
+            border-radius: 8px; margin-bottom: 8px;
+        }
+        .app-card {
+            background: rgba(0,0,0,0.2); border-radius: 12px; padding: 15px;
+            margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .app-info h4 { margin-bottom: 4px; }
+        .app-info p { font-size: 13px; color: #808080; }
+        .app-btns { display: flex; gap: 8px; }
+        .msg-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px; background: rgba(255,255,255,0.03);
+            border-radius: 8px; margin-bottom: 8px;
+        }
+        .reply-box {
+            display: flex; gap: 10px; margin-top: 10px;
+        }
+        .reply-box input {
+            flex: 1; padding: 10px; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;
+            color: #fff; font-family: 'Tajawal', sans-serif;
+        }
+        .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .status-pending { background: rgba(255,193,7,0.2); color: #FFC107; }
+        .status-approved { background: rgba(76,175,80,0.2); color: #4CAF50; }
+        .status-rejected { background: rgba(244,67,54,0.2); color: #f44336; }
+        .refresh-btn {
+            padding: 10px 20px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 8px;
+            color: #fff; cursor: pointer; font-family: 'Tajawal', sans-serif;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(192,192,192,0.3); border-radius: 3px; }
+        @media (max-width: 600px) { .app-card { flex-direction: column; gap: 10px; } .input-row { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    
+    <div class="login-box" id="loginBox">
+        <h2>تسجيل دخول الإدارة</h2>
+        <input type="password" id="adminPass" placeholder="كلمة المرور">
+        <button onclick="login()">دخول</button>
+    </div>
+
+    <div class="main" id="main">
+        <div class="header">
+            <h1>لوحة تحكم PERK</h1>
+            <button class="refresh-btn" onclick="loadAll()">تحديث</button>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('top')">التوب 15</button>
+            <button class="tab" onclick="showTab('apps')">الطلبات</button>
+            <button class="tab" onclick="showTab('msgs')">الرسائل</button>
+            <button class="tab" onclick="showTab('results')">النتائج</button>
+        </div>
+
+        <!-- التوب -->
+        <div class="panel active" id="panelTop">
+            <div class="card">
+                <h3>تعديل مركز</h3>
+                <div class="input-row">
+                    <input type="number" id="editRank" placeholder="المركز (1-15)" min="1" max="15">
+                    <input type="text" id="editName" placeholder="اسم اللاعب">
+                    <button class="btn" onclick="updateTop()">تحديث</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>القائمة الحالية</h3>
+                <div id="topList"></div>
+            </div>
+        </div>
+
+        <!-- الطلبات -->
+        <div class="panel" id="panelApps">
+            <div class="card">
+                <h3>طلبات التقديم</h3>
+                <div id="appsList"></div>
+            </div>
+        </div>
+
+        <!-- الرسائل -->
+        <div class="panel" id="panelMsgs">
+            <div class="card">
+                <h3>رسائل اللاعبين</h3>
+                <div id="msgsList"></div>
+            </div>
+        </div>
+
+        <!-- النتائج -->
+        <div class="panel" id="panelResults">
+            <div class="card">
+                <h3>نتائج معلقة</h3>
+                <div id="pendingResults"></div>
+            </div>
+            <div class="card">
+                <h3>جميع النتائج</h3>
+                <div id="allResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const DB_URL = 'https://jsonblob.com/api/jsonBlob/YOUR_BLOB_ID'; // نفس الرابط
+        const ADMIN_PASS = 'perk2026'; // غير كلمة المرور
+        let players = [];
+        let apps = [];
+        let msgs = [];
+        let results = [];
+
+        async function loadAll() {
+            try {
+                const res = await fetch(DB_URL);
+                const data = await res.json();
+                players = data.players || [];
+                apps = data.apps || [];
+                msgs = data.msgs || [];
+                results = data.results || [];
+                renderAll();
+            } catch(e) { alert('خطأ في تحميل البيانات'); }
+        }
+
+        async function saveAll() {
+            await fetch(DB_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ players, apps, msgs, results })
+            });
+            renderAll();
+        }
+
+        function login() {
+            if(document.getElementById('adminPass').value === ADMIN_PASS) {
+                document.getElementById('loginBox').style.display = 'none';
+                document.getElementById('main').classList.add('active');
+                loadAll();
+            } else {
+                alert('كلمة المرور غير صحيحة');
+            }
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('panel'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.add('active');
+        }
+
+        function renderAll() {
+            renderTop();
+            renderApps();
+            renderMsgs();
+            renderResults();
+        }
+
+        function renderTop() {
+            const list = document.getElementById('topList');
+            list.innerHTML = '';
+            players.sort((a,b) => a.rank-b.rank);
+            players.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+                div.innerHTML = `<span>${p.rank}. ${p.name} (${p.status})</span><button class="btn-red" onclick="removePlayer(${p.rank})">حذف</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        async function updateTop() {
+            const rank = parseInt(document.getElementById('editRank').value);
+            const name = document.getElementById('editName').value.trim();
+            if(!rank || !name) return alert('املأ الحقول');
+            const p = players.find(x => x.rank === rank);
+            if(p) { p.name = name; p.status = 'محتل'; }
+            await saveAll();
+            document.getElementById('editRank').value = '';
+            document.getElementById('editName').value = '';
+        }
+
+        async function removePlayer(rank) {
+            const p = players.find(x => x.rank === rank);
+            if(p) { p.name = `المركز ${rank}`; p.status = 'متاح'; p.wins = 0; p.losses = 0; }
+            await saveAll();
+        }
+
+        function renderApps() {
+            const list = document.getElementById('appsList');
+            list.innerHTML = '';
+            const pending = apps.filter(a => a.status === 'pending');
+            if(pending.length === 0) { list.innerHTML = '<p style="color:#808080;">لا توجد طلبات</p>'; return; }
+            pending.forEach(a => {
+                const div = document.createElement('div');
+                div.className = 'app-card';
+                div.innerHTML = `
+                    <div class="app-info">
+                        <h4>${a.name}</h4>
+                        <p>يطلب المركز ${a.rank} | ${a.time}</p>
+                    </div>
+                    <div class="app-btns">
+                        <button class="btn-green" onclick="approveApp(${a.id})">قبول</button>
+                        <button class="btn-red" onclick="rejectApp(${a.id})">رفض</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function approveApp(id) {
+            const app = apps.find(a => a.id === id);
+            if(app) {
+                app.status = 'approved';
+                const p = players.find(x => x.rank === app.rank);
+                if(p) { p.name = app.name; p.status = 'محتل'; }
+            }
+            await saveAll();
+        }
+
+        async function rejectApp(id) {
+            const app = apps.find(a => a.id === id);
+            if(app) app.status = 'rejected';
+            await saveAll();
+        }
+
+        function renderMsgs() {
+            const list = document.getElementById('msgsList');
+            list.innerHTML = '';
+            
+            // تجميع الرسائل حسب المرسل
+            const bySender = {};
+            msgs.forEach(m => {
+                const key = m.sender === 'admin' ? m.receiver : m.sender;
+                if(!bySender[key]) bySender[key] = [];
+                bySender[key].push(m);
+            });
+
+            Object.keys(bySender).forEach(sender => {
+                if(sender === 'admin') return;
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.style.marginBottom = '15px';
+                
+                const lastMsg = bySender[sender][bySender[sender].length-1];
+                div.innerHTML = `
+                    <div class="msg-row">
+                        <div>
+                            <strong>${sender}</strong>
+                            <p style="color:#808080; font-size:13px; margin-top:4px;">${lastMsg.text}</p>
+                        </div>
+                        <span style="color:#808080; font-size:12px;">${lastMsg.time}</span>
+                    </div>
+                    <div class="reply-box">
+                        <input type="text" id="reply-${sender}" placeholder="رد على ${sender}...">
+                        <button class="btn" onclick="replyTo('${sender}')">رد</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+
+            if(list.innerHTML === '') list.innerHTML = '<p style="color:#808080;">لا توجد رسائل</p>';
+        }
+
+        async function replyTo(sender) {
+            const input = document.getElementById('reply-'+sender);
+            const text = input.value.trim();
+            if(!text) return;
+            
+            msgs.push({
+                sender: 'admin',
+                receiver: sender,
+                text: text,
+                time: new Date().toLocaleTimeString('ar-SA')
+            });
+            await saveAll();
+            input.value = '';
+        }
+
+        function renderResults() {
+            const pending = document.getElementById('pendingResults');
+            const all = document.getElementById('allResults');
+            pending.innerHTML = '';
+            all.innerHTML = '';
+            
+            const pend = results.filter(r => r.status === 'pending');
+            const done = results.filter(r => r.status === 'verified');
+
+            if(pend.length === 0) pending.innerHTML = '<p style="color:#808080;">لا توجد نتائج معلقة</p>';
+            else {
+                pend.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'app-card';
+                    div.innerHTML = `
+                        <div class="app-info">
+                            <h4>${r.p1} vs ${r.p2}</h4>
+                            <p>النتيجة: ${r.s1} - ${r.s2} | ${r.date}</p>
+                        </div>
+                        <button class="btn-green" onclick="verifyResult('${r.p1}-${r.date}')">توثيق</button>
+                    `;
+                    pending.appendChild(div);
+                });
+            }
+
+            if(done.length === 0) all.innerHTML = '<p style="color:#808080;">لا توجد نتائج موثقة</p>';
+            else {
+                done.forEach(r => {
+                    const div = document.createElement('div');
+                    div.className = 'list-item';
+                    div.innerHTML = `<span>${r.p1} ${r.s1} - ${r.s2} ${r.p2}</span><span style="color:#4CAF50;">موثق</span>`;
+                    all.appendChild(div);
+                });
+            }
+        }
+
+        async function verifyResult(key) {
+            // البحث بالتاريخ واللاعب
+            const r = results.find(x => x.p1+'-'+x.date === key);
+            if(r) {
+                r.status = 'verified';
+                // تحديث الإحصائيات
+                const p1 = players.find(p => p.name === r.p1);
+                const p2 = players.find(p => p.name === r.p2);
+                if(r.s1 > r.s2) { if(p1) p1.wins++; if(p2) p2.losses++; }
+                else { if(p2) p2.wins++; if(p1) p1.losses++; }
+            }
+            await saveAll();
+        }
+
+        document.getElementById('adminPass').addEventListener('keypress', e => { if(e.key==='Enter') login(); });
+    </script>
+</body>
+</html>
