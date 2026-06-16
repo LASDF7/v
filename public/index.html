@@ -177,6 +177,10 @@
         .chat-input input { flex: 1; padding: 14px 18px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-family: 'Tajawal'; font-size: 14px; }
         .chat-input input:focus { outline: none; border-color: rgba(192,192,192,0.3); }
         .chat-input button { padding: 14px 24px; background: linear-gradient(135deg, #c0c0c0, #808080); border: none; border-radius: 12px; color: #0a0a0f; font-weight: 700; font-family: 'Tajawal'; cursor: pointer; }
+        .typing-indicator {
+            padding: 10px 15px; color: #505050; font-size: 12px; display: none;
+        }
+        .typing-indicator.active { display: block; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(192,192,192,0.2); border-radius: 3px; }
@@ -190,7 +194,7 @@
         <div class="logo-text">PERK</div>
         <div class="logo-sub">TIME BOMB</div>
         <div class="login-box">
-            <p>ادخل اسمك للانضمام للتوب </p>
+            <p>ادخل اسمك للانضمام للتوب 15</p>
             <input type="text" id="playerName" placeholder="اكتب اسمك هنا..." maxlength="20">
             <button class="btn-primary" onclick="enter()">دخول</button>
         </div>
@@ -212,18 +216,18 @@
             <div class="hero-shield"></div>
             <div class="hero-title">PERK</div>
             <div class="hero-sub">TIME BOMB</div>
-            <p class="hero-desc">منافسه شريفه واي غش او كذب يتم اقصائه</p>
+            <p class="hero-desc">نظام توب 15 للمنافسة الشرفية. تقدم على مركز، نافس الأبطال، وارتقِ في السلسلة حتى القمة.</p>
         </section>
 
         <div class="quick-links">
-            <button class="quick-link" onclick="showSection('top')">التوبات</button>
+            <button class="quick-link" onclick="showSection('top')">التوب 15</button>
             <button class="quick-link" onclick="openChat()">الدعم</button>
             <button class="quick-link" onclick="showSection('results')">النتائج</button>
-            <button class="quick-link" onclick="showSection('submit')">إرسال نتيجة(للحكم)</button>
+            <button class="quick-link" onclick="showSection('submit')">إرسال نتيجة</button>
         </div>
 
         <section class="section active" id="secTop">
-            <div class="section-header"><h2>التوب </h2></div>
+            <div class="section-header"><h2>التوب 15</h2></div>
             <div class="top-list" id="topList"></div>
         </section>
 
@@ -246,8 +250,8 @@
         </section>
 
         <footer class="footer">
-            <p> PERK TIME BOMB - جميع الحقوق محفوظة</p>
-            <p style="margin-top: 8px;">صنع لأعضاء PERK</p>
+            <p>2026 PERK TIME BOMB - جميع الحقوق محفوظة</p>
+            <p style="margin-top: 8px;">صنع باحترافية لأعضاء PERK</p>
         </footer>
     </div>
 
@@ -259,16 +263,28 @@
                 <button class="chat-close" onclick="closeChat()">X</button>
             </div>
             <div class="chat-messages" id="chatMsg">
-                <div class="msg msg-admin"><div class="msg-author">الإدارة</div><div class="msg-text">مرحباً بك في PERK TIME BOMB كيف يمكنني مساعدتك؟</div><div class="msg-time">الآن</div></div>
+                <div class="msg msg-admin"><div class="msg-author">الإدارة</div><div class="msg-text">مرحباً بك في PERK TIME BOMB! كيف يمكنني مساعدتك؟</div><div class="msg-time">الآن</div></div>
             </div>
+            <div class="typing-indicator" id="typingIndicator">الإدارة يكتب...</div>
             <div class="chat-input"><input type="text" id="chatIn" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()">إرسال</button></div>
         </div>
     </div>
 
     <script>
         const API_URL = window.location.origin + '/api/data';
-        let user = '';
+        let user = localStorage.getItem('perk_user') || '';
         let db = { players: [], apps: [], msgs: [], results: [] };
+        let chatInterval = null;
+        let lastMsgCount = 0;
+
+        // تحقق من تسجيل الدخول التلقائي
+        window.onload = async function() {
+            if (user) {
+                // فيه حساب محفوظ، ادخل مباشرة
+                document.getElementById('playerName').value = user;
+                await enter();
+            }
+        };
 
         async function loadDB() {
             const res = await fetch(API_URL);
@@ -284,11 +300,16 @@
         }
 
         async function enter() {
-            const name = document.getElementById('playerName').value.trim();
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
             if(!name) return alert('اكتب اسمك');
+            
             user = name;
-            document.getElementById('displayName').textContent = name;
-            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            // حفظ الحساب في المتصفح
+            localStorage.setItem('perk_user', user);
+            
+            document.getElementById('displayName').textContent = user;
+            document.getElementById('userAvatar').textContent = user.charAt(0).toUpperCase();
             document.getElementById('loginScreen').classList.add('hidden');
             setTimeout(() => {
                 document.getElementById('loginScreen').style.display = 'none';
@@ -296,6 +317,12 @@
             }, 500);
             await loadDB();
             renderTop();
+        }
+
+        function logout() {
+            localStorage.removeItem('perk_user');
+            user = '';
+            location.reload();
         }
 
         function showSection(sec) {
@@ -328,31 +355,99 @@
             await saveDB();
             openChat();
             setTimeout(() => addMsg('user', `أرغب في التقديم على المركز ${rank}`), 300);
-            setTimeout(() => addMsg('admin', `تم استلام طلبك. رقم الطلب: ${db.apps[db.apps.length-1].id}`), 1000);
         }
 
-        function openChat() { document.getElementById('chatOverlay').classList.add('active'); loadChat(); }
-        function closeChat() { document.getElementById('chatOverlay').classList.remove('active'); }
+        function openChat() {
+            document.getElementById('chatOverlay').classList.add('active');
+            loadChat();
+            // بدء التحديث التلقائي
+            startChatRefresh();
+        }
+
+        function closeChat() {
+            document.getElementById('chatOverlay').classList.remove('active');
+            // إيقاف التحديث التلقائي
+            stopChatRefresh();
+        }
+
+        function startChatRefresh() {
+            // تحديث كل 2 ثانية
+            chatInterval = setInterval(async () => {
+                await loadDB();
+                const myMsgs = db.msgs.filter(m => 
+                    (m.sender === user && m.receiver === 'admin') || 
+                    (m.sender === 'admin' && m.receiver === user)
+                );
+                
+                // إذا فيه رسائل جديدة
+                if (myMsgs.length > lastMsgCount) {
+                    renderChatMessages(myMsgs);
+                    lastMsgCount = myMsgs.length;
+                }
+            }, 2000);
+        }
+
+        function stopChatRefresh() {
+            if (chatInterval) {
+                clearInterval(chatInterval);
+                chatInterval = null;
+            }
+        }
 
         function loadChat() {
+            const myMsgs = db.msgs.filter(m => 
+                (m.sender === user && m.receiver === 'admin') || 
+                (m.sender === 'admin' && m.receiver === user)
+            );
+            lastMsgCount = myMsgs.length;
+            renderChatMessages(myMsgs);
+        }
+
+        function renderChatMessages(messages) {
             const box = document.getElementById('chatMsg');
             box.innerHTML = '<div class="msg msg-admin"><div class="msg-author">الإدارة</div><div class="msg-text">مرحباً بك في PERK TIME BOMB! كيف يمكنني مساعدتك؟</div><div class="msg-time">الآن</div></div>';
-            const myMsgs = db.msgs.filter(m => m.sender===user || m.receiver===user || m.sender==='admin');
-            myMsgs.forEach(m => addMsgToBox(m.sender==='admin'?'msg-admin':'msg-user', m.sender==='admin'?'الإدارة':m.sender, m.text, m.time));
+            
+            messages.forEach(m => {
+                const type = m.sender === 'admin' ? 'msg-admin' : 'msg-user';
+                const author = m.sender === 'admin' ? 'الإدارة' : m.sender;
+                addMsgToBox(type, author, m.text, m.time);
+            });
         }
 
         async function sendMsg() {
             const input = document.getElementById('chatIn');
             const text = input.value.trim();
             if(!text) return;
-            db.msgs.push({sender:user, receiver:'admin', text, time:new Date().toLocaleTimeString('ar-SA')});
+            
+            // إظهار مؤشر الكتابة
+            document.getElementById('typingIndicator').classList.add('active');
+            
+            db.msgs.push({
+                sender: user, 
+                receiver: 'admin', 
+                text, 
+                time: new Date().toLocaleTimeString('ar-SA')
+            });
             await saveDB();
+            
             addMsgToBox('msg-user', user, text, 'الآن');
             input.value = '';
+            
+            // إخفاء مؤشر الكتابة
+            setTimeout(() => {
+                document.getElementById('typingIndicator').classList.remove('active');
+            }, 500);
         }
 
         function addMsgToBox(type, author, text, time) {
             const box = document.getElementById('chatMsg');
+            // تحقق من عدم التكرار
+            const existing = Array.from(box.children).find(child => 
+                child.querySelector('.msg-text')?.textContent === text &&
+                child.querySelector('.msg-author')?.textContent === author
+            );
+            if (existing) return;
+            
             const div = document.createElement('div');
             div.className = `msg ${type}`;
             div.innerHTML = `<div class="msg-author">${author}</div><div class="msg-text">${text}</div><div class="msg-time">${time}</div>`;
