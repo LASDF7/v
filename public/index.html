@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PERK TIME BOMB - Top 15</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(ellipse at 20% 50%, rgba(192,192,192,0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 80% 50%, rgba(128,128,128,0.06) 0%, transparent 50%);
+            z-index: -1;
+        }
+        .login {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(180deg, #0f0f1a 0%, #0a0a0f 100%);
+            z-index: 1000; transition: opacity 0.8s;
+        }
+        .login.hidden { opacity: 0; pointer-events: none; }
+        .logo-circle {
+            width: 180px; height: 180px; border-radius: 50%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            border: 2px solid rgba(192,192,192,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 30px; box-shadow: 0 0 60px rgba(192,192,192,0.1);
+        }
+        .shield-icon {
+            width: 100px; height: 100px;
+            background: linear-gradient(135deg, #c0c0c0 0%, #808080 50%, #505050 100%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            position: relative;
+        }
+        .shield-icon::after {
+            content: ''; position: absolute; inset: 8px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        .logo-text { font-size: 52px; font-weight: 900; letter-spacing: 12px; color: #c0c0c0; }
+        .logo-sub { font-size: 18px; color: #606060; letter-spacing: 8px; margin-bottom: 50px; }
+        .login-box {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; padding: 40px; width: 90%; max-width: 420px; text-align: center;
+        }
+        .login-box p { color: #808080; margin-bottom: 20px; font-size: 14px; }
+        .login-box input {
+            width: 100%; padding: 16px 20px; background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(192,192,192,0.2); border-radius: 12px;
+            color: #fff; font-size: 16px; font-family: 'Tajawal'; margin-bottom: 15px;
+        }
+        .login-box input:focus { outline: none; border-color: rgba(192,192,192,0.5); }
+        .btn-primary {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #c0c0c0, #808080);
+            border: none; border-radius: 12px; color: #0a0a0f;
+            font-size: 18px; font-weight: 900; font-family: 'Tajawal'; cursor: pointer;
+            letter-spacing: 2px;
+        }
+        .main { display: none; }
+        .main.active { display: block; }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 40px; background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100;
+        }
+        .nav-logo { display: flex; align-items: center; gap: 15px; }
+        .nav-shield {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+        .nav-title { font-size: 20px; font-weight: 900; color: #c0c0c0; letter-spacing: 4px; }
+        .nav-user { display: flex; align-items: center; gap: 12px; }
+        .nav-avatar {
+            width: 40px; height: 40px; border-radius: 50%;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: #0a0a0f; font-size: 16px;
+        }
+        .nav-name { color: #808080; font-size: 14px; }
+        .hero { text-align: center; padding: 80px 20px 60px; }
+        .hero-shield {
+            width: 120px; height: 120px;
+            background: linear-gradient(135deg, #c0c0c0 0%, #808080 50%, #505050 100%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            margin: 0 auto 25px; box-shadow: 0 0 40px rgba(192,192,192,0.15);
+        }
+        .hero-title { font-size: 42px; font-weight: 900; letter-spacing: 10px; color: #c0c0c0; }
+        .hero-sub { font-size: 16px; color: #505050; letter-spacing: 6px; margin-bottom: 40px; }
+        .hero-desc { max-width: 600px; margin: 0 auto; color: #606060; line-height: 1.8; font-size: 15px; }
+        .quick-links {
+            display: flex; justify-content: center; gap: 20px; padding: 0 20px 40px; flex-wrap: wrap;
+        }
+        .quick-link {
+            padding: 14px 28px; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+            color: #808080; font-size: 14px; font-weight: 700; cursor: pointer;
+            font-family: 'Tajawal'; transition: all 0.3s;
+        }
+        .quick-link:hover {
+            background: rgba(255,255,255,0.06); border-color: rgba(192,192,192,0.3); color: #c0c0c0;
+        }
+        .section { display: none; max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+        .section.active { display: block; }
+        .section-header { text-align: center; margin-bottom: 40px; }
+        .section-header h2 { font-size: 28px; font-weight: 900; color: #c0c0c0; }
+        .top-list { display: flex; flex-direction: column; gap: 12px; }
+        .top-item {
+            display: flex; align-items: center; gap: 15px;
+            padding: 16px 20px; background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; transition: all 0.3s;
+        }
+        .top-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(192,192,192,0.15); }
+        .rank { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-weight: 900; font-size: 18px; }
+        .rank-1 { background: linear-gradient(135deg, #FFD700, #B8860B); color: #000; box-shadow: 0 0 20px rgba(255,215,0,0.2); }
+        .rank-2 { background: linear-gradient(135deg, #C0C0C0, #808080); color: #000; box-shadow: 0 0 20px rgba(192,192,192,0.2); }
+        .rank-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); color: #fff; box-shadow: 0 0 20px rgba(205,127,50,0.2); }
+        .rank-other { background: rgba(255,255,255,0.05); color: #808080; border: 1px solid rgba(255,255,255,0.1); }
+        .player-info { flex: 1; }
+        .player-name { font-weight: 700; font-size: 16px; color: #e0e0e0; }
+        .player-stats { font-size: 12px; color: #505050; margin-top: 4px; }
+        .player-status { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+        .status-available { background: rgba(255,255,255,0.05); color: #808080; border: 1px solid rgba(255,255,255,0.1); }
+        .status-occupied { background: rgba(76,175,80,0.1); color: #4CAF50; border: 1px solid rgba(76,175,80,0.2); }
+        .apply-btn {
+            padding: 10px 24px; background: linear-gradient(135deg, #c0c0c0, #808080);
+            border: none; border-radius: 10px; color: #0a0a0f; font-weight: 700;
+            cursor: pointer; font-family: 'Tajawal';
+        }
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .card {
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px; padding: 25px;
+        }
+        .card h3 { font-size: 18px; color: #c0c0c0; margin-bottom: 15px; }
+        .card p { color: #505050; font-size: 14px; line-height: 1.6; }
+        .footer { text-align: center; padding: 40px 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 60px; }
+        .footer p { color: #404040; font-size: 13px; }
+        .chat-overlay {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; padding: 20px;
+        }
+        .chat-overlay.active { display: flex; align-items: center; justify-content: center; }
+        .chat-box {
+            width: 100%; max-width: 800px; height: 85vh;
+            background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px; display: flex; flex-direction: column; overflow: hidden;
+        }
+        .chat-header {
+            padding: 20px; background: rgba(255,255,255,0.03);
+            display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .chat-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: linear-gradient(135deg, #c0c0c0, #808080);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; color: #0a0a0f;
+        }
+        .chat-close { margin-right: auto; background: none; border: none; color: #505050; font-size: 24px; cursor: pointer; }
+        .chat-close:hover { color: #c0c0c0; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { max-width: 75%; padding: 14px 18px; border-radius: 14px; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .msg-admin { align-self: flex-start; background: rgba(192,192,192,0.08); border: 1px solid rgba(192,192,192,0.15); }
+        .msg-user { align-self: flex-end; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); }
+        .msg-author { font-size: 12px; font-weight: 700; color: #c0c0c0; margin-bottom: 6px; }
+        .msg-text { font-size: 14px; line-height: 1.5; color: #e0e0e0; }
+        .msg-time { font-size: 10px; color: #404040; margin-top: 6px; }
+        .chat-input { padding: 20px; background: rgba(255,255,255,0.02); display: flex; gap: 12px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .chat-input input { flex: 1; padding: 14px 18px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; font-family: 'Tajawal'; font-size: 14px; }
+        .chat-input input:focus { outline: none; border-color: rgba(192,192,192,0.3); }
+        .chat-input button { padding: 14px 24px; background: linear-gradient(135deg, #c0c0c0, #808080); border: none; border-radius: 12px; color: #0a0a0f; font-weight: 700; font-family: 'Tajawal'; cursor: pointer; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(192,192,192,0.2); border-radius: 3px; }
+        @media (max-width: 768px) { .navbar { padding: 15px 20px; } .hero { padding: 50px 20px 40px; } .hero-title { font-size: 32px; } .logo-text { font-size: 36px; } }
+    </style>
+</head>
+<body>
+    <div class="bg"></div>
+    <div class="login" id="loginScreen">
+        <div class="logo-circle"><div class="shield-icon"></div></div>
+        <div class="logo-text">PERK</div>
+        <div class="logo-sub">TIME BOMB</div>
+        <div class="login-box">
+            <p>ادخل اسمك للانضمام للتوب 15</p>
+            <input type="text" id="playerName" placeholder="اكتب اسمك هنا..." maxlength="20">
+            <button class="btn-primary" onclick="enter()">دخول</button>
+        </div>
+    </div>
+
+    <div class="main" id="main">
+        <nav class="navbar">
+            <div class="nav-logo">
+                <div class="nav-shield"></div>
+                <div class="nav-title">PERK</div>
+            </div>
+            <div class="nav-user">
+                <div class="nav-name" id="displayName">اللاعب</div>
+                <div class="nav-avatar" id="userAvatar">P</div>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="hero-shield"></div>
+            <div class="hero-title">PERK</div>
+            <div class="hero-sub">TIME BOMB</div>
+            <p class="hero-desc">نظام توب 15 للمنافسة الشرفية. تقدم على مركز، نافس الأبطال، وارتقِ في السلسلة حتى القمة.</p>
+        </section>
+
+        <div class="quick-links">
+            <button class="quick-link" onclick="showSection('top')">التوب 15</button>
+            <button class="quick-link" onclick="openChat()">الدعم</button>
+            <button class="quick-link" onclick="showSection('results')">النتائج</button>
+            <button class="quick-link" onclick="showSection('submit')">إرسال نتيجة</button>
+        </div>
+
+        <section class="section active" id="secTop">
+            <div class="section-header"><h2>التوب 15</h2></div>
+            <div class="top-list" id="topList"></div>
+        </section>
+
+        <section class="section" id="secResults">
+            <div class="section-header"><h2>النتائج</h2></div>
+            <div class="cards-grid" id="resultsList"></div>
+        </section>
+
+        <section class="section" id="secSubmit">
+            <div class="section-header"><h2>إرسال نتيجة</h2></div>
+            <div class="cards-grid">
+                <div class="card" style="max-width: 500px; margin: 0 auto;">
+                    <h3>تفاصيل المباراة</h3><br>
+                    <input type="text" id="oppName" placeholder="اسم الخصم" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-family: 'Tajawal'; margin-bottom: 12px;">
+                    <input type="number" id="myScore" placeholder="نتيجتك" min="0" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-family: 'Tajawal'; margin-bottom: 12px;">
+                    <input type="number" id="oppScore" placeholder="نتيجة الخصم" min="0" style="width: 100%; padding: 14px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-family: 'Tajawal'; margin-bottom: 20px;">
+                    <button class="btn-primary" onclick="sendResult()" style="width: 100%;">إرسال النتيجة</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>2026 PERK TIME BOMB - جميع الحقوق محفوظة</p>
+            <p style="margin-top: 8px;">صنع باحترافية لأعضاء PERK</p>
+        </footer>
+    </div>
+
+    <div class="chat-overlay" id="chatOverlay">
+        <div class="chat-box">
+            <div class="chat-header">
+                <div class="chat-avatar">A</div>
+                <div><div style="font-weight: 900; color: #c0c0c0;">إدارة PERK</div><div style="font-size: 12px; color: #4CAF50;">متصل</div></div>
+                <button class="chat-close" onclick="closeChat()">X</button>
+            </div>
+            <div class="chat-messages" id="chatMsg">
+                <div class="msg msg-admin"><div class="msg-author">الإدارة</div><div class="msg-text">مرحباً بك في PERK TIME BOMB! كيف يمكنني مساعدتك؟</div><div class="msg-time">الآن</div></div>
+            </div>
+            <div class="chat-input"><input type="text" id="chatIn" placeholder="اكتب رسالتك..." onkeypress="if(event.key==='Enter') sendMsg()"><button onclick="sendMsg()">إرسال</button></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = window.location.origin + '/api/data';
+        let user = '';
+        let db = { players: [], apps: [], msgs: [], results: [] };
+
+        async function loadDB() {
+            const res = await fetch(API_URL);
+            db = await res.json();
+        }
+
+        async function saveDB() {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(db)
+            });
+        }
+
+        async function enter() {
+            const name = document.getElementById('playerName').value.trim();
+            if(!name) return alert('اكتب اسمك');
+            user = name;
+            document.getElementById('displayName').textContent = name;
+            document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('loginScreen').classList.add('hidden');
+            setTimeout(() => {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('main').classList.add('active');
+            }, 500);
+            await loadDB();
+            renderTop();
+        }
+
+        function showSection(sec) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            if(sec==='top') { document.getElementById('secTop').classList.add('active'); renderTop(); }
+            else if(sec==='results') { document.getElementById('secResults').classList.add('active'); renderResults(); }
+            else if(sec==='submit') document.getElementById('secSubmit').classList.add('active');
+        }
+
+        function renderTop() {
+            const list = document.getElementById('topList');
+            list.innerHTML = '';
+            db.players.sort((a,b) => a.rank-b.rank);
+            db.players.forEach(p => {
+                const rc = p.rank===1?'rank-1':p.rank===2?'rank-2':p.rank===3?'rank-3':'rank-other';
+                const taken = p.name!==`المركز ${p.rank}` && p.name!=='فارغ';
+                const st = taken?'status-occupied':'status-available';
+                const stText = taken?'محتل':'متاح';
+                const div = document.createElement('div');
+                div.className = 'top-item';
+                div.innerHTML = `<div class="rank ${rc}">${p.rank}</div><div class="player-info"><div class="player-name">${p.name}</div><div class="player-stats">فوز: ${p.wins} | خسارة: ${p.losses}</div></div><div class="player-status ${st}">${stText}</div><button class="apply-btn" onclick="apply(${p.rank})">${taken?'تحدي':'تقديم'}</button>`;
+                list.appendChild(div);
+            });
+        }
+
+        async function apply(rank) {
+            const ex = db.apps.find(a => a.name===user && a.status==='pending');
+            if(ex) return alert('عندك طلب قيد المراجعة');
+            db.apps.push({id:Date.now(), name:user, rank:rank, status:'pending', time:new Date().toLocaleString('ar-SA')});
+            await saveDB();
+            openChat();
+            setTimeout(() => addMsg('user', `أرغب في التقديم على المركز ${rank}`), 300);
+            setTimeout(() => addMsg('admin', `تم استلام طلبك. رقم الطلب: ${db.apps[db.apps.length-1].id}`), 1000);
+        }
+
+        function openChat() { document.getElementById('chatOverlay').classList.add('active'); loadChat(); }
+        function closeChat() { document.getElementById('chatOverlay').classList.remove('active'); }
+
+        function loadChat() {
+            const box = document.getElementById('chatMsg');
+            box.innerHTML = '<div class="msg msg-admin"><div class="msg-author">الإدارة</div><div class="msg-text">مرحباً بك في PERK TIME BOMB! كيف يمكنني مساعدتك؟</div><div class="msg-time">الآن</div></div>';
+            const myMsgs = db.msgs.filter(m => m.sender===user || m.receiver===user || m.sender==='admin');
+            myMsgs.forEach(m => addMsgToBox(m.sender==='admin'?'msg-admin':'msg-user', m.sender==='admin'?'الإدارة':m.sender, m.text, m.time));
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('chatIn');
+            const text = input.value.trim();
+            if(!text) return;
+            db.msgs.push({sender:user, receiver:'admin', text, time:new Date().toLocaleTimeString('ar-SA')});
+            await saveDB();
+            addMsgToBox('msg-user', user, text, 'الآن');
+            input.value = '';
+        }
+
+        function addMsgToBox(type, author, text, time) {
+            const box = document.getElementById('chatMsg');
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            div.innerHTML = `<div class="msg-author">${author}</div><div class="msg-text">${text}</div><div class="msg-time">${time}</div>`;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function addMsg(type, text) {
+            const author = type==='admin'?'الإدارة':user;
+            const time = new Date().toLocaleTimeString('ar-SA');
+            db.msgs.push({sender:type==='admin'?'admin':user, receiver:type==='admin'?user:'admin', text, time});
+            saveDB();
+            addMsgToBox(type==='admin'?'msg-admin':'msg-user', author, text, time);
+        }
+
+        function renderResults() {
+            const list = document.getElementById('resultsList');
+            list.innerHTML = '';
+            if(db.results.length===0) { list.innerHTML = '<div class="card"><p style="text-align: center; color: #505050;">لا توجد نتائج بعد</p></div>'; return; }
+            db.results.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                const status = r.status==='verified'?'معتمد':'قيد المراجعة';
+                const statusColor = r.status==='verified'?'#4CAF50':'#FFC107';
+                div.innerHTML = `<h3>${r.p1} vs ${r.p2}</h3><p style="font-size: 24px; font-weight: 900; color: #c0c0c0; margin: 15px 0;">${r.s1} - ${r.s2}</p><p style="color: ${statusColor}; font-size: 13px;">${status} | ${r.date}</p>`;
+                list.appendChild(div);
+            });
+        }
+
+        async function sendResult() {
+            const p2 = document.getElementById('oppName').value;
+            const s1 = parseInt(document.getElementById('myScore').value);
+            const s2 = parseInt(document.getElementById('oppScore').value);
+            if(!p2 || isNaN(s1) || isNaN(s2)) return alert('املأ كل الحقول');
+            db.results.push({p1:user, p2, s1, s2, status:'pending', date:new Date().toLocaleDateString('ar-SA')});
+            await saveDB();
+            alert('تم الإرسال! بانتظار توثيق الإدارة');
+            showSection('results');
+        }
+
+        document.getElementById('playerName').addEventListener('keypress', e => { if(e.key==='Enter') enter(); });
+    </script>
+</body>
+</html>
