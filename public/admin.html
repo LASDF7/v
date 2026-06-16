@@ -35,8 +35,17 @@
         .app-info h4 { margin-bottom: 4px; }
         .app-info p { font-size: 13px; color: #505050; }
         .refresh-btn { padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #808080; cursor: pointer; font-family: 'Tajawal'; }
-        .status { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-        .status-pending { background: rgba(255,193,7,0.1); color: #FFC107; border: 1px solid rgba(255,193,7,0.2); }
+        .chat-box { background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
+        .chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .chat-messages { max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+        .msg { padding: 8px 12px; margin-bottom: 8px; border-radius: 8px; }
+        .msg-admin { background: rgba(192,192,192,0.08); }
+        .msg-user { background: rgba(255,255,255,0.05); text-align: left; }
+        .msg-author { font-size: 11px; color: #c0c0c0; margin-bottom: 3px; }
+        .msg-text { font-size: 13px; }
+        .reply-box { display: flex; gap: 8px; }
+        .reply-box input { flex: 1; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: 'Tajawal'; }
+        .unread-badge { background: #f44336; color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 11px; margin-right: 8px; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(192,192,192,0.2); border-radius: 3px; }
@@ -80,7 +89,7 @@
         </div>
 
         <div class="panel" id="panelMsgs">
-            <div class="card"><h3>رسائل اللاعبين</h3><div id="msgsList"></div></div>
+            <div class="card"><h3>رسائل اللاعبين <span id="unreadCount" style="color: #f44336; font-size: 14px;"></span></h3><div id="msgsList"></div></div>
         </div>
 
         <div class="panel" id="panelResults">
@@ -93,11 +102,14 @@
         const API_URL = window.location.origin + '/api/data';
         const ADMIN_PASS = 'perk2026';
         let db = { players: [], apps: [], msgs: [], results: [] };
+        let refreshInterval = null;
+        let lastMsgsLength = 0;
 
         async function loadAll() {
             const res = await fetch(API_URL);
             db = await res.json();
             renderAll();
+            checkNewMessages();
         }
 
         async function saveAll() {
@@ -114,6 +126,8 @@
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('main').classList.add('active');
                 loadAll();
+                // بدء التحديث التلقائي كل 3 ثواني
+                refreshInterval = setInterval(loadAll, 3000);
             } else {
                 alert('كلمة المرور غير صحيحة');
             }
@@ -131,6 +145,20 @@
             renderApps();
             renderMsgs();
             renderResults();
+        }
+
+        function checkNewMessages() {
+            const unread = db.msgs.filter(m => m.sender !== 'admin' && !m.read).length;
+            const badge = document.getElementById('unreadCount');
+            if (badge) {
+                badge.textContent = unread > 0 ? `(${unread} جديدة)` : '';
+            }
+            
+            // إشعار صوتي إذا فيه رسائل جديدة
+            if (db.msgs.length > lastMsgsLength && lastMsgsLength > 0) {
+                // هنا ممكن تضيف صوت إشعار
+            }
+            lastMsgsLength = db.msgs.length;
         }
 
         function renderTop() {
@@ -194,22 +222,55 @@
         function renderMsgs() {
             const list = document.getElementById('msgsList');
             list.innerHTML = '';
+            
+            // تجميع الرسائل حسب المرسل
             const bySender = {};
             db.msgs.forEach(m => {
-                const key = m.sender === 'admin' ? m.receiver : m.sender;
-                if(!bySender[key]) bySender[key] = [];
-                bySender[key].push(m);
+                if (m.sender === 'admin') return;
+                if(!bySender[m.sender]) bySender[m.sender] = [];
+                bySender[m.sender].push(m);
             });
 
             Object.keys(bySender).forEach(sender => {
-                if(sender === 'admin') return;
+                const msgs = bySender[sender];
+                const unread = msgs.filter(m => !m.read).length;
+                
                 const div = document.createElement('div');
-                div.className = 'card';
-                div.style.marginBottom = '15px';
-                const lastMsg = bySender[sender][bySender[sender].length-1];
-                div.innerHTML = `<div class="list-item"><div><strong style="color:#c0c0c0;">${sender}</strong><p style="color:#505050; font-size:13px; margin-top:4px;">${lastMsg.text}</p></div><span style="color:#505050; font-size:12px;">${lastMsg.time}</span></div><div class="input-row" style="margin-top:10px;"><input type="text" id="reply-${sender}" placeholder="رد على ${sender}..."><button class="btn-small" onclick="replyTo('${sender}')">رد</button></div>`;
+                div.className = 'chat-box';
+                
+                const lastMsg = msgs[msgs.length - 1];
+                
+                let html = `
+                    <div class="chat-header">
+                        <div>
+                            <strong style="color:#c0c0c0;">${sender}</strong>
+                            ${unread > 0 ? `<span class="unread-badge">${unread}</span>` : ''}
+                        </div>
+                        <span style="color:#505050; font-size:12px;">${lastMsg.time}</span>
+                    </div>
+                    <div class="chat-messages" id="chat-${sender}">
+                `;
+                
+                // عرض آخر 5 رسائل
+                msgs.slice(-5).forEach(m => {
+                    const type = m.sender === 'admin' ? 'msg-admin' : 'msg-user';
+                    const author = m.sender === 'admin' ? 'الإدارة' : m.sender;
+                    html += `<div class="msg ${type}"><div class="msg-author">${author}</div><div class="msg-text">${m.text}</div></div>`;
+                });
+                
+                html += `
+                    </div>
+                    <div class="reply-box">
+                        <input type="text" id="reply-${sender}" placeholder="رد على ${sender}...">
+                        <button class="btn-small" onclick="replyTo('${sender}')">رد</button>
+                        <button class="btn-small" onclick="markRead('${sender}')">تم القراءة</button>
+                    </div>
+                `;
+                
+                div.innerHTML = html;
                 list.appendChild(div);
             });
+
             if(list.innerHTML === '') list.innerHTML = '<p style="color:#505050;">لا توجد رسائل</p>';
         }
 
@@ -217,9 +278,24 @@
             const input = document.getElementById('reply-'+sender);
             const text = input.value.trim();
             if(!text) return;
-            db.msgs.push({sender: 'admin', receiver: sender, text, time: new Date().toLocaleTimeString('ar-SA')});
+            
+            db.msgs.push({
+                sender: 'admin',
+                receiver: sender,
+                text: text,
+                time: new Date().toLocaleTimeString('ar-SA'),
+                read: true
+            });
             await saveAll();
             input.value = '';
+        }
+
+        async function markRead(sender) {
+            // تعليم رسائل المرسل كمقروءة
+            db.msgs.forEach(m => {
+                if (m.sender === sender) m.read = true;
+            });
+            await saveAll();
         }
 
         function renderResults() {
