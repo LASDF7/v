@@ -7,10 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ملف قاعدة البيانات
 const DB_FILE = './db.json';
 
-// قراءة DB
 function readDB() {
     try {
         return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
@@ -30,17 +28,14 @@ function readDB() {
     }
 }
 
-// حفظ DB
 function saveDB(data) {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-// تهيئة أول مرة
 if (!fs.existsSync(DB_FILE)) {
     saveDB(readDB());
 }
 
-// API
 app.get('/api/data', (req, res) => {
     res.json(readDB());
 });
@@ -50,10 +45,8 @@ app.post('/api/data', (req, res) => {
     res.json({ success: true });
 });
 
-// الملفات الثابتة
 app.use(express.static('public'));
 
-// أي رابط غير API يروح للـ index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
